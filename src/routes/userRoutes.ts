@@ -1,37 +1,16 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/userController';
-import { validate } from '../middleware/validate';
-import {
-    createUserSchema,
-    updateUserSchema,
-    idParamSchema,
-    paginationQuerySchema
-} from '../dto/user.dto';
-import { asyncHandler } from '../utils/asyncHandler';
+import { authMiddleware } from '../middleware/auth'; // O kung asa man nahimutang ang imong auth middleware file
 
-export const userRoutes = Router();
+const router = Router();
 
-userRoutes.get(
-    '/',
-    validate(paginationQuerySchema, 'query'),
-    asyncHandler(UserController.getAll)
-);
+// Ang GET /api/users kinahanglan na karon og valid Bearer Token
+router.get('/', authMiddleware, UserController.getAll);
 
-userRoutes.get(
-    '/:id',
-    validate(idParamSchema, 'params'),
-    asyncHandler(UserController.getById)
-);
+// Ang GET /api/users/:id kinahanglan pud og token
+router.get('/:id', authMiddleware, UserController.getById);
 
-userRoutes.post(
-    '/',
-    validate(createUserSchema),
-    asyncHandler(UserController.create)
-);
+// Ang pag-create (POST /api/users) pwede ra walay token (kung para ra sa registration)
+router.post('/', UserController.create);
 
-userRoutes.put(
-    '/:id',
-    validate(idParamSchema, 'params'),
-    validate(updateUserSchema),
-    asyncHandler(UserController.update)
-);
+export const userRoutes = router;
