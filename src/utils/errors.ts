@@ -39,3 +39,10 @@ export class ConflictError extends AppError {
         super(message, 409, 'CONFLICT_ERROR');
     }
 }
+
+// Gi-add nato ni dinhi bro aron mawala na ang error sa authService.ts
+export class UnauthorizedError extends AppError {
+    constructor(message: string = 'Unauthorized') {
+        super(message, 401, 'UNAUTHORIZED');
+    }
+}

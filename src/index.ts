@@ -1,19 +1,27 @@
-import "reflect-metadata";
+import 'reflect-metadata';
 import express from 'express';
 import { AppDataSource } from './config/data-source';
-import { logger } from './utils/logger';
-import { errorHandler, notFoundHandler } from './middleware/errorHandler';
-import { userRoutes } from './routes/userRoutes';
 
+// Kung wala kay explicit export nga `logger` gikan sa utils/logger, o kung `createLogger` naa didto:
+import { createLogger } from './utils/logger';
+
+// I-adjust ang import path sa imong middleware ug routes kon asa gyud sila dapit nahimutang
+import { userRoutes } from './routes/userRoutes';
+import { authRoutes } from './routes/authRoutes';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+
+const logger = createLogger('Server');
 const app = express();
 const env = process.env as Record<string, any>;
 const PORT = env.PORT || 3000;
 
+app.set('trust proxy', 1);
+
 // Parsing Middlewares
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health Check Route (Para sa Test 1 sa Postman)
+// Health Check Route (Diretso na diri, wala na magkinahanglan og healthRoutes file)
 app.get('/health', (req, res) => {
     res.status(200).json({ 
         status: 'OK', 
@@ -21,7 +29,8 @@ app.get('/health', (req, res) => {
     });
 });
 
-// API Routes
+// Register API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
 // Error Handlers
